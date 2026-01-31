@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleops;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
@@ -9,7 +8,6 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.auto.AprilTagDetectionTest;
 import org.firstinspires.ftc.teamcode.commands.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.commands.setTrigger;
 import org.firstinspires.ftc.teamcode.subsystems.Drive;
@@ -34,58 +32,11 @@ import java.util.ArrayList;
 
 
 //OpMode is actual code that is initialized and ran, calls commands which call methods of subsystems
-public class AprilTagDetectionTest extends LinearOpMode {
-    EOCVAprilTagPipeline aprilTagDetectionPipeline;
-    Drive drivetrain;
-    /*
-    double fx = 679.2888908044871;
-    double fy = 679.0590608430991;
-    double cx = 399.04720194230583;
-    double cy = 301.4138740002473;
-    double tagsize = 0.173;
-     */
-    @Override
-    public void runOpMode() throws InterruptedException {
-        //drivetrain = new Drive(hardwareMap, telemetry);
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        OpenCvWebcam camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-
-        aprilTagDetectionPipeline = new EOCVAprilTagPipeline(telemetry);
-        aprilTagDetectionPipeline.setDecimation(3);
-        camera.setPipeline(aprilTagDetectionPipeline);
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened()
-            {
-                camera.startStreaming(800,600, OpenCvCameraRotation.UPRIGHT);
-            }
-            @Override
-            public void onError(int errorCode) {}
-        });
-
-        //FtcDashboard.getInstance().startCameraStream(camera, 0);
-
-        waitForStart();
-
-        while (opModeIsActive()) {
-            ArrayList<AprilTagDetection> detectedTags = aprilTagDetectionPipeline.getLatestDetections();
-            if (!detectedTags.isEmpty()) {
-                for (AprilTagDetection detectedTag : detectedTags) {
-                    telemetry.addData("Pipeline", "Tag " + detectedTag.id + " found");
-                }
-            }   else {
-                telemetry.addData("Pipeline","No tags found");
-            }
-            telemetry.update();
-        }
-
-    }
-
-
-}
 @TeleOp(name="DefaultTeleOp")
 public class DefaultTeleOp extends CommandOpMode {
     //initialize variables
+    public double detectedX;
+    public double detectedY;
     Drive drivetrain;
     RobotCentricDrive r_drive;
     GamepadEx controller1;
@@ -96,56 +47,10 @@ public class DefaultTeleOp extends CommandOpMode {
     Trigger RT;
     setTrigger triggerCmd;
     int i = 0;
-
-    public class AprilTagDetectionTest extends LinearOpMode {
-        EOCVAprilTagPipeline aprilTagDetectionPipeline;
-        Drive drivetrain;
-        /*
-        double fx = 679.2888908044871;
-        double fy = 679.0590608430991;
-        double cx = 399.04720194230583;
-        double cy = 301.4138740002473;
-        double tagsize = 0.173;
-         */
-        @Override
-        public void runOpMode() throws InterruptedException {
-            //drivetrain = new Drive(hardwareMap, telemetry);
-            int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-            OpenCvWebcam camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-
-            aprilTagDetectionPipeline = new EOCVAprilTagPipeline(telemetry);
-            aprilTagDetectionPipeline.setDecimation(3);
-            camera.setPipeline(aprilTagDetectionPipeline);
-            camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-                @Override
-                public void onOpened()
-                {
-                    camera.startStreaming(800,600, OpenCvCameraRotation.UPRIGHT);
-                }
-                @Override
-                public void onError(int errorCode) {}
-            });
-
-            //FtcDashboard.getInstance().startCameraStream(camera, 0);
-
-            waitForStart();
-
-            while (opModeIsActive()) {
-                ArrayList<AprilTagDetection> detectedTags = aprilTagDetectionPipeline.getLatestDetections();
-                if (!detectedTags.isEmpty()) {
-                    for (AprilTagDetection detectedTag : detectedTags) {
-                        telemetry.addData("Pipeline", "Tag " + detectedTag.id + " found");
-                    }
-                }   else {
-                    telemetry.addData("Pipeline","No tags found");
-                }
-                telemetry.update();
-            }
-
-        }
+    EOCVAprilTagPipeline aprilTagDetectionPipeline;
 
 
-    }
+    public double naught;
 
     //initialize function runs when init is pressed on the driver station with this teleop selected
     @Override
@@ -189,9 +94,11 @@ public class DefaultTeleOp extends CommandOpMode {
                 .whenReleased(new InstantCommand(drivetrain::changeDirection));
 
         controller1.getGamepadButton(GamepadKeys.Button.B)
-                .whenReleased(new InstantCommand(blocker::positionNaught));
+                .whenReleased(new InstantCommand(blocker::positionZero));
+        /*
         controller1.getGamepadButton(GamepadKeys.Button.A)
-                .whenReleased(new InstantCommand(blocker::positionUp));
+                .whenReleased(new InstantCommand(blocker::positionBlock));
+        */
 
         controller1.getGamepadButton(GamepadKeys.Button.Y)
                 .whileHeld(new InstantCommand(trigger::reverseShoot))
@@ -200,14 +107,15 @@ public class DefaultTeleOp extends CommandOpMode {
                 .whileHeld(new InstantCommand(trigger::shoot))
                 .whenReleased(new InstantCommand(trigger::stop));
 
-        /* Freaky ahh skill issue useless Button A shooter implementation
 
         controller1.getGamepadButton(GamepadKeys.Button.A)
                 .whileHeld(new ParallelCommandGroup(
                     new SequentialCommandGroup(
                         new InstantCommand(() -> shooter.spin(gamepad1.right_trigger)),
                         new InstantCommand(trigger::reverseShoot),
+                        new InstantCommand(blocker::positionBlock),
                         new WaitCommand(1000),
+                        new InstantCommand(blocker::positionDefault),
                         new InstantCommand(trigger::shoot),
                     new InstantCommand(intake::spin))))
                 .whenReleased(new ParallelCommandGroup(
@@ -216,7 +124,7 @@ public class DefaultTeleOp extends CommandOpMode {
                         new InstantCommand(intake::stop)
                 ));
 
-         */
+
 
         RT.whileActiveContinuous(
                 new InstantCommand(() -> shooter.spin(1), shooter)
@@ -225,6 +133,21 @@ public class DefaultTeleOp extends CommandOpMode {
         RT.whenInactive(
                 new InstantCommand(shooter::stop, shooter)
         );
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        OpenCvWebcam camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        aprilTagDetectionPipeline = new EOCVAprilTagPipeline(telemetry);
+        aprilTagDetectionPipeline.setDecimation(3);
+        camera.setPipeline(aprilTagDetectionPipeline);
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened()
+            {
+                camera.startStreaming(800,600, OpenCvCameraRotation.UPRIGHT);
+            }
+            @Override
+            public void onError(int errorCode) {}
+        });
 
 
 
@@ -234,9 +157,19 @@ public class DefaultTeleOp extends CommandOpMode {
     @Override
     public void run() {
         super.run();
-        telemetry.addData("Blocker Pos",blocker.get_angle());
+        telemetry.addData("Blocker Angle",blocker.get_angle());
         telemetry.addLine();
-        telemetry.addData("tag", aprilTagDetections);
+        telemetry.addData("Blocker Pos",blocker.get_position());
+        telemetry.addLine();
+        ArrayList<AprilTagDetection> detectedTags = aprilTagDetectionPipeline.getLatestDetections();
+        if (!detectedTags.isEmpty()) {
+            for (AprilTagDetection detectedTag : detectedTags) {
+                telemetry.addData("Pipeline", "Tag " + detectedTag.id + " found" );
+                telemetry.addData("Distance", detectedTag.pose.x);
+            }
+        }   else {
+            telemetry.addData("Pipeline","No tags found");
+        }
         telemetry.update();
     }
 

@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.commands.shoot_3;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.subsystems.Blocker;
 import org.firstinspires.ftc.teamcode.subsystems.Bot_Trigger;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
@@ -44,6 +45,8 @@ public class DecodeBlue extends OpMode {
     private Shooter shooter;
     private Intake intake;
     private Bot_Trigger trigger;
+
+    private Blocker blocker;
 
     Paths paths;
     private shoot_3 shootCmd;
@@ -88,6 +91,7 @@ public class DecodeBlue extends OpMode {
         shoot_timer = new Timer();
         intake = new Intake(hardwareMap, telemetry);
         trigger = new Bot_Trigger(hardwareMap, telemetry);
+        blocker = new Blocker(hardwareMap,telemetry);
 
 
 
@@ -340,16 +344,19 @@ public class DecodeBlue extends OpMode {
     public boolean shoot_3(Timer timer){
         if (timer.getElapsedTime()<=1000) {
             shooter.spin(shoot_power);
+            telemetry.addData("Shooting:","spinning up");
             return false;
         } else if (timer.getElapsedTime()>1000 && timer.getElapsedTime()<=4000) {
             shooter.spin(shoot_power);
             intake.spin();
             trigger.shoot();
+            telemetry.addData("Shooting:","firing");
             return false;
         } else {
             shooter.spin(0);
             intake.stop();
             trigger.stop();
+            telemetry.addData("Shooting:","stopping");
             return true;
         }
     }

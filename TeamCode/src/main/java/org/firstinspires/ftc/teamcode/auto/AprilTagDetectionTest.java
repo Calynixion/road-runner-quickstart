@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class AprilTagDetectionTest extends LinearOpMode {
     EOCVAprilTagPipeline aprilTagDetectionPipeline;
     Drive drivetrain;
+    public int amount_found = 0;
     /*
     double fx = 679.2888908044871;
     double fy = 679.0590608430991;
@@ -54,6 +55,7 @@ public class AprilTagDetectionTest extends LinearOpMode {
             if (!detectedTags.isEmpty()) {
                 for (AprilTagDetection detectedTag : detectedTags) {
                     telemetry.addData("Pipeline", "Tag " + detectedTag.id + " found");
+                    amount_found+=1;
                 }
             }   else {
                 telemetry.addData("Pipeline","No tags found");
