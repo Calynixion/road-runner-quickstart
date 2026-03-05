@@ -7,6 +7,9 @@ public class aedricTeleop extends OpMode
     double driveSpeed;
 
     aedricMotorDrive motors = new aedricMotorDrive();
+    aedricIntake Intake = new aedricIntake();
+    aedricTransfer Transfer = new aedricTransfer();
+    aedricLauncher Launcher = new aedricLauncher();
 
     @Override
     public void init()
@@ -50,5 +53,9 @@ public class aedricTeleop extends OpMode
 
         motors.drive(gamepad1.left_stick_x, gamepad1.left_stick_x,
                      gamepad1.right_stick_x, gamepad1.dpad_down, driveSpeed);
+
+        Intake.Intake(gamepad1.left_bumper);
+        Transfer.Transfer(gamepad1.left_bumper);
+        Launcher.Launch(gamepad1.right_trigger);
     }
 }

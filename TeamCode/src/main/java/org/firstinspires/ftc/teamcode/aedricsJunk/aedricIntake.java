@@ -15,8 +15,11 @@ public class aedricIntake
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    public void Intake(double intakeSpeed)
+    public void Intake(boolean buttonIsPressed)
     {
-        intakeMotor.setPower(intakeSpeed);
+        if (buttonIsPressed)
+        {
+            intakeMotor.setPower(100);
+        }
     }
 }
